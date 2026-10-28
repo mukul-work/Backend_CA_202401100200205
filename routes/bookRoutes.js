@@ -57,7 +57,7 @@ router.get("/", async (req, res) => {
             data: books
         })
     } catch (error) {
-        console.error(`Error while adding:${error.message}`)
+        console.error(`Error while fetching:${error.message}`)
         return res.status(500).json({
             message: "Internal Server Error",
             data: null
@@ -67,13 +67,40 @@ router.get("/", async (req, res) => {
 })
 
 router.patch("/:id", async (req, res) => {
-    const { status } = req.body
-    if (!status || status.trim() === "" || status.isBoolean() === false) {
-        return res.status(400).json({
-            message: "Provide the correct status",
+    try {
+        const { status } = req.body
+        if (!status || status.trim() === "" || status.isBoolean() === false) {
+            return res.status(400).json({
+                message: "Provide the correct status",
+                data: null
+            })
+        }
+        const { id } = req.params
+        if(!id || id.trim() === "" || Mongo.Types.ObjectId.isValid(id) === false){
+            return res.status(400).json({
+                message: "Provide valid Id",
+                data: null
+            })
+        }
+
+        const updatedBook = await BookModel.findByIdAndUpdate(id, {availabilityStatus: status})
+        if(!updatedBook){
+            return res.status(404).json({
+                message: "Book not found for updation",
+                data:null
+            })
+        }
+        return res.status(200).json({
+            message: "Book patched successfully",
+            data: updatedBook
+        })
+
+    } catch (error) {
+        console.error(`Error while patching:${error.message}`)
+        return res.status(500).json({
+            message: "Internal Server Error",
             data: null
         })
     }
-    const { id } = req.params
-    const updatedBook = BookModel.updateOne({})
+
 })
