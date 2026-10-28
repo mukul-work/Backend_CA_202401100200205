@@ -2,22 +2,22 @@ const mongoose = require("mongoose")
 
 const Book = new mongoose.Schema({
     title: {
-        Type: String,
+        type: String,
         required: true,
         trim: true,
     },
     author: {
-        Type: String,
+        type: String,
         required: true,
         trim: true,
     },
     category: {
-        Type: String,
+        type: String,
         required: true,
         trim: true,
     },
     availabilityStatus: {
-        Type: Boolean,
+        type: Boolean,
         default: false,
         required: true,
     }

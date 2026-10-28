@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 app.use(express.json());
-app.use("api/books", bookRoutes);
+app.use("/api/books", bookRoutes);
 async function startServer(){
     try{
         await connectDb();

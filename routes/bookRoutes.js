@@ -9,7 +9,6 @@ router.post("/", async (req, res) => {
         if (!title || title.trim() === "" || !author || author.trim() === "" || !category || category.trim() === "") {
             return res.status(400).json({
                 message: "Please provide all the details",
-                data: null
             })
         }
 
@@ -23,7 +22,6 @@ router.post("/", async (req, res) => {
 
         return res.status(201).json({
             message: "Book added",
-            data: newBook
         })
 
     }
@@ -31,7 +29,6 @@ router.post("/", async (req, res) => {
         console.error(`Error while adding:${error.message}`)
         return res.status(500).json({
             message: "Internal Server Error",
-            data: null
         })
     }
 })
@@ -43,7 +40,7 @@ router.get("/", async (req, res) => {
         const sanitizedLimit = parseInt(limit, 10) < 0 ? 10 : parseInt(limit, 10) || 10
         const skip = (sanitizedPage - 1) * sanitizedLimit
 
-        const books = BookModel.find().skip(skip).limit(sanitizedLimit)
+        const books = await BookModel.find().skip(skip).limit(sanitizedLimit)
 
         if (books.length === 0) {
             return res.status(404).json({
@@ -69,25 +66,22 @@ router.get("/", async (req, res) => {
 router.patch("/:id", async (req, res) => {
     try {
         const { status } = req.body
-        if (!status || status.trim() === "" || status.isBoolean() === false) {
+        if (!status || status.trim() === "" || (status !== "true" && status !== "false")) {
             return res.status(400).json({
-                message: "Provide the correct status",
-                data: null
+                message: "Provide the correct status"
             })
         }
         const { id } = req.params
         if(!id || id.trim() === "" || Mongo.Types.ObjectId.isValid(id) === false){
             return res.status(400).json({
-                message: "Provide valid Id",
-                data: null
+                message: "Provide valid Id"
             })
         }
 
-        const updatedBook = await BookModel.findByIdAndUpdate(id, {availabilityStatus: status})
+        const updatedBook = await BookModel.findByIdAndUpdate(id, {availabilityStatus: status}, {new :true})
         if(!updatedBook){
             return res.status(404).json({
-                message: "Book not found for updation",
-                data:null
+                message: "Book not found for updation"
             })
         }
         return res.status(200).json({
@@ -98,8 +92,7 @@ router.patch("/:id", async (req, res) => {
     } catch (error) {
         console.error(`Error while patching:${error.message}`)
         return res.status(500).json({
-            message: "Internal Server Error",
-            data: null
+            message: "Internal Server Error"
         })
     }
 
