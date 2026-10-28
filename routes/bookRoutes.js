@@ -63,39 +63,44 @@ router.get("/", async (req, res) => {
 
 })
 
+
 router.patch("/:id", async (req, res) => {
     try {
-        const { status } = req.body
-        if (!status || status.trim() === "" || (status !== "true" && status !== "false")) {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!mongoose.isValidObjectId(id)) {
             return res.status(400).json({
-                message: "Provide the correct status"
-            })
-        }
-        const { id } = req.params
-        if(!id || id.trim() === "" || Mongo.Types.ObjectId.isValid(id) === false){
-            return res.status(400).json({
-                message: "Provide valid Id"
-            })
+                message: "Provide a valid ID"
+            });
         }
 
-        const updatedBook = await BookModel.findByIdAndUpdate(id, {availabilityStatus: status}, {new :true})
-        if(!updatedBook){
+        if (typeof status !== "boolean") {
+            return res.status(400).json({
+                message: "Status must be a boolean"
+            });
+        }
+
+        const updatedBook = await BookModel.findByIdAndUpdate(id, { availabilityStatus: status }, { new: true, runValidators: true });
+
+        if (!updatedBook) {
             return res.status(404).json({
                 message: "Book not found for updation"
-            })
+            });
         }
+
         return res.status(200).json({
             message: "Book patched successfully",
             data: updatedBook
-        })
+        });
 
     } catch (error) {
-        console.error(`Error while patching:${error.message}`)
+        console.error("Error while patching:", error);
+
         return res.status(500).json({
             message: "Internal Server Error"
-        })
+        });
     }
+});
 
-})
-
-module.exports = router
+module.exports = router;
